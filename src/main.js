@@ -18,13 +18,24 @@ const hitSoundUrls = [
   'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
 ];
 let hitSounds = [];
+// Prevent overlapping/very rapid sound retriggers
+let lastHitMs = 0;
+const HIT_MIN_INTERVAL_MS = 120;
 function playBeep() {
   try {
+    const now = Date.now();
+    if (now - lastHitMs < HIT_MIN_INTERVAL_MS) return; // throttle
     if (hitSounds.length) {
       const idx = Math.floor(Math.random() * hitSounds.length);
       const s = hitSounds[idx];
-      s.currentTime = 0;
+      // play only if allowed; reset time and play
+      try {
+        s.currentTime = 0;
+      } catch (e) {
+        /* ignore setTime errors */
+      }
       s.play().catch(() => {});
+      lastHitMs = now;
     }
   } catch (e) {
     // ignore
@@ -110,7 +121,7 @@ startBtn.addEventListener('click', () => {
   if (!hitSounds.length) {
     hitSounds = hitSoundUrls.map((u) => {
       const a = new Audio(u);
-      a.volume = 0.18;
+      a.volume = 0.12; // slightly lower default volume
       a.preload = 'auto';
       return a;
     });
