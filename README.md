@@ -38,7 +38,7 @@ python3 -m http.server 8000
  - `src/style.css` — スタイル
 
 ## スクリーンショット
-![screenshot](assets/screenshot.svg)
+![screenshot](assets/screenshot.png)
 
 ## スクリーンショットの差し替え方法
 1. GitHub Pages 上の公開ページ（デモ）をブラウザで開く: https://hqx8bpcnr5-source.github.io/simple-browser-game-1/
@@ -88,7 +88,7 @@ python3 -m http.server 8000
 - `src/style.css` — スタイル
 
 ## スクリーンショット
-![screenshot](assets/screenshot.svg)
+![screenshot](assets/screenshot.png)
 
 ## 貢献
 - プルリクエスト歓迎。フォーマットは Prettier、Lint は ESLint に合わせてください。
