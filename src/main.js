@@ -113,14 +113,39 @@ function createGame() {
 }
 
 window.onGameOver = function (finalScore) {
-  finalScoreEl.textContent = `Score: ${finalScore}`;
+  const finalScoreEl = document.getElementById('finalScore');
+  const gameOver = document.getElementById('gameOver');
+  const highScoreEl = document.getElementById('highScore');
   const key = 'simple-browser-game-highscore';
-  hitSounds = hitSoundUrls.map((info) => {
-    const a = new Audio(info.url);
-    a.volume = info.volume;
-    a.preload = 'auto';
-    return a;
-  });
+
+  // show final score
+  if (finalScoreEl) finalScoreEl.textContent = `Score: ${finalScore}`;
+
+  // update highscore if needed
+  try {
+    const prev = parseInt(localStorage.getItem(key) || '0', 10);
+    if (finalScore > prev) {
+      localStorage.setItem(key, String(finalScore));
+      if (highScoreEl) highScoreEl.textContent = `Highscore: ${finalScore}`;
+    } else {
+      if (highScoreEl) highScoreEl.textContent = `Highscore: ${prev}`;
+    }
+  } catch (e) {
+    // ignore storage errors
+  }
+
+  // ensure sounds are prepared for next run
+  if (!hitSounds.length) {
+    hitSounds = hitSoundUrls.map((info) => {
+      const a = new Audio(info.url);
+      a.volume = info.volume;
+      a.preload = 'auto';
+      return a;
+    });
+  }
+
+  // reveal game over overlay
+  if (gameOver) gameOver.classList.remove('hidden');
 };
 
 startBtn.addEventListener('click', () => {
