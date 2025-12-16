@@ -3,10 +3,17 @@
   "version": "0.1.0",
   "description": "Simple browser game using Phaser",
   "scripts": {
-    "start": "python3 -m http.server 8000"
+    "start": "python3 -m http.server 8000",
+    "lint": "eslint \"src/**/*.js\"",
+    "format": "prettier --write \"src/**/*.{js,css,html}\""
   },
   "dependencies": {
     "phaser": "^3.60.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "prettier": "^2.8.8",
+    "eslint-config-prettier": "^8.8.0"
   },
   "author": "",
   "license": "MIT"
