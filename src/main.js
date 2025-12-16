@@ -12,12 +12,19 @@ let timeLeft = 30;
 let game = null;
 
 // simple WebAudio beep
-let hitSound = null;
+const hitSoundUrls = [
+  'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+  'https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg',
+  'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+];
+let hitSounds = [];
 function playBeep() {
   try {
-    if (hitSound) {
-      hitSound.currentTime = 0;
-      hitSound.play().catch(() => {});
+    if (hitSounds.length) {
+      const idx = Math.floor(Math.random() * hitSounds.length);
+      const s = hitSounds[idx];
+      s.currentTime = 0;
+      s.play().catch(() => {});
     }
   } catch (e) {
     // ignore
@@ -100,10 +107,13 @@ window.onGameOver = function (finalScore) {
 startBtn.addEventListener('click', () => {
   startScreen.classList.add('hidden');
   // prepare sound on first user gesture
-  if (!hitSound) {
-    hitSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-    hitSound.volume = 0.18;
-    hitSound.preload = 'auto';
+  if (!hitSounds.length) {
+    hitSounds = hitSoundUrls.map((u) => {
+      const a = new Audio(u);
+      a.volume = 0.18;
+      a.preload = 'auto';
+      return a;
+    });
   }
   createGame();
 });

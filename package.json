@@ -1,6 +1,6 @@
 {
   "name": "simple-browser-game",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple browser game using Phaser",
   "scripts": {
     "start": "python3 -m http.server 8000",
