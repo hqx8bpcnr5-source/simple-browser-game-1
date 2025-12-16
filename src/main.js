@@ -15,7 +15,8 @@ let game = null;
 let audioCtx = null;
 function playBeep() {
   try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx)
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     o.type = 'sine';
@@ -24,26 +25,36 @@ function playBeep() {
     o.connect(g);
     g.connect(audioCtx.destination);
     o.start();
-    setTimeout(() => { o.stop(); }, 120);
+    setTimeout(() => {
+      o.stop();
+    }, 120);
   } catch (e) {
     // ignore if audio not available
   }
 }
 
 class MainScene extends Phaser.Scene {
-  constructor() { super('main'); }
-  preload() {}
+  constructor() {
+    super('main');
+  }
+  preload() {
+    /* noop */
+  }
   create() {
-    const w = 640, h = 480;
-    this.target = this.add.circle(w/2, h/2, 25, 0xff4c3c);
-    this.target.setInteractive(new Phaser.Geom.Circle(0,0,25), Phaser.Geom.Circle.Contains);
+    const w = 640,
+      h = 480;
+    this.target = this.add.circle(w / 2, h / 2, 25, 0xff4c3c);
+    this.target.setInteractive(
+      new Phaser.Geom.Circle(0, 0, 25),
+      Phaser.Geom.Circle.Contains
+    );
     this.input.on('gameobjectdown', (pointer, gameObject) => {
       if (gameObject === this.target) {
         score += 1;
         scoreEl.textContent = `Score: ${score}`;
         playBeep();
-        this.target.x = Phaser.Math.Between(25, w-25);
-        this.target.y = Phaser.Math.Between(25, h-25);
+        this.target.x = Phaser.Math.Between(25, w - 25);
+        this.target.y = Phaser.Math.Between(25, h - 25);
       }
     });
 
@@ -58,10 +69,12 @@ class MainScene extends Phaser.Scene {
           window.onGameOver(score);
           this.scene.pause();
         }
-      }
+      },
     });
   }
-  update() {}
+  update() {
+    /* noop */
+  }
 }
 
 const config = {
@@ -70,7 +83,7 @@ const config = {
   height: 480,
   parent: null,
   scene: [MainScene],
-  backgroundColor: '#f8f8f8'
+  backgroundColor: '#f8f8f8',
 };
 
 function createGame() {
@@ -82,7 +95,7 @@ function createGame() {
   game = new Phaser.Game(config);
 }
 
-window.onGameOver = function(finalScore) {
+window.onGameOver = function (finalScore) {
   finalScoreEl.textContent = `Score: ${finalScore}`;
   const key = 'simple-browser-game-highscore';
   const prev = parseInt(localStorage.getItem(key) || '0', 10);
@@ -102,14 +115,20 @@ restartBtn.addEventListener('click', () => {
   gameOver.classList.add('hidden');
   // destroy previous game instance if exists
   if (game) {
-    try { game.destroy(true); } catch (e) {}
+    try {
+      game.destroy(true);
+    } catch (e) {
+      /* ignore destroy errors */
+    }
     game = null;
   }
   createGame();
 });
 
 // populate highscore display initially
-(function() {
+(function () {
   const key = 'simple-browser-game-highscore';
-  document.getElementById('highScore').textContent = `Highscore: ${localStorage.getItem(key) || '0'}`;
+  document.getElementById('highScore').textContent = `Highscore: ${
+    localStorage.getItem(key) || '0'
+  }`;
 })();
