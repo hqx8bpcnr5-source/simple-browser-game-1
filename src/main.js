@@ -1,83 +1,115 @@
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const timeEl = document.getElementById('time');
+const startScreen = document.getElementById('startScreen');
+const startBtn = document.getElementById('startBtn');
+const gameOver = document.getElementById('gameOver');
+const finalScoreEl = document.getElementById('finalScore');
+const highScoreEl = document.getElementById('highScore');
+const restartBtn = document.getElementById('restartBtn');
 
 let score = 0;
-let timeLeft = 30; // 秒
+let timeLeft = 30;
+let game = null;
 
-const target = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  r: 25,
-  vx: 150, // px/s
-  vy: 100,
+// simple WebAudio beep
+let audioCtx = null;
+function playBeep() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = 800;
+    g.gain.value = 0.08;
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start();
+    setTimeout(() => { o.stop(); }, 120);
+  } catch (e) {
+    // ignore if audio not available
+  }
+}
+
+class MainScene extends Phaser.Scene {
+  constructor() { super('main'); }
+  preload() {}
+  create() {
+    const w = 640, h = 480;
+    this.target = this.add.circle(w/2, h/2, 25, 0xff4c3c);
+    this.target.setInteractive(new Phaser.Geom.Circle(0,0,25), Phaser.Geom.Circle.Contains);
+    this.input.on('gameobjectdown', (pointer, gameObject) => {
+      if (gameObject === this.target) {
+        score += 1;
+        scoreEl.textContent = `Score: ${score}`;
+        playBeep();
+        this.target.x = Phaser.Math.Between(25, w-25);
+        this.target.y = Phaser.Math.Between(25, h-25);
+      }
+    });
+
+    this.timerEvent = this.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: () => {
+        timeLeft -= 1;
+        timeEl.textContent = `Time: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          // notify host page
+          window.onGameOver(score);
+          this.scene.pause();
+        }
+      }
+    });
+  }
+  update() {}
+}
+
+const config = {
+  type: Phaser.AUTO,
+  width: 640,
+  height: 480,
+  parent: null,
+  scene: [MainScene],
+  backgroundColor: '#f8f8f8'
 };
 
-let last = null;
-let running = true;
-
-function rand(min, max) { return Math.random() * (max - min) + min; }
-
-function update(dt) {
-  // 移動
-  target.x += target.vx * dt;
-  target.y += target.vy * dt;
-  // 壁で反射
-  if (target.x - target.r < 0) { target.x = target.r; target.vx *= -1; }
-  if (target.x + target.r > canvas.width) { target.x = canvas.width - target.r; target.vx *= -1; }
-  if (target.y - target.r < 0) { target.y = target.r; target.vy *= -1; }
-  if (target.y + target.r > canvas.height) { target.y = canvas.height - target.r; target.vy *= -1; }
+function createGame() {
+  score = 0;
+  timeLeft = 30;
+  scoreEl.textContent = `Score: ${score}`;
+  timeEl.textContent = `Time: ${timeLeft}`;
+  // create Phaser game instance
+  game = new Phaser.Game(config);
 }
 
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // target
-  ctx.beginPath();
-  ctx.fillStyle = '#e74c3c';
-  ctx.arc(target.x, target.y, target.r, 0, Math.PI*2);
-  ctx.fill();
-}
-
-function loop(t) {
-  if (!last) last = t;
-  const dt = (t - last) / 1000;
-  last = t;
-  if (running) {
-    update(dt);
-    draw();
+window.onGameOver = function(finalScore) {
+  finalScoreEl.textContent = `Score: ${finalScore}`;
+  const key = 'simple-browser-game-highscore';
+  const prev = parseInt(localStorage.getItem(key) || '0', 10);
+  if (finalScore > prev) {
+    localStorage.setItem(key, String(finalScore));
   }
-  requestAnimationFrame(loop);
-}
+  highScoreEl.textContent = `Highscore: ${localStorage.getItem(key) || '0'}`;
+  gameOver.classList.remove('hidden');
+};
 
-canvas.addEventListener('click', (e) => {
-  if (!running) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const dx = x - target.x;
-  const dy = y - target.y;
-  if (dx*dx + dy*dy <= target.r*target.r) {
-    score += 1;
-    scoreEl.textContent = `Score: ${score}`;
-    // ヒットしたら少し速くして位置をランダムにする
-    const speedUp = 1.05;
-    target.vx *= -speedUp;
-    target.vy *= -speedUp;
-    target.x = rand(target.r, canvas.width - target.r);
-    target.y = rand(target.r, canvas.height - target.r);
-  }
+startBtn.addEventListener('click', () => {
+  startScreen.classList.add('hidden');
+  createGame();
 });
 
-// タイマー
-setInterval(() => {
-  if (!running) return;
-  timeLeft -= 1;
-  timeEl.textContent = `Time: ${timeLeft}`;
-  if (timeLeft <= 0) {
-    running = false;
-    alert(`Time's up! Score: ${score}`);
+restartBtn.addEventListener('click', () => {
+  gameOver.classList.add('hidden');
+  // destroy previous game instance if exists
+  if (game) {
+    try { game.destroy(true); } catch (e) {}
+    game = null;
   }
-}, 1000);
+  createGame();
+});
 
-requestAnimationFrame(loop);
+// populate highscore display initially
+(function() {
+  const key = 'simple-browser-game-highscore';
+  document.getElementById('highScore').textContent = `Highscore: ${localStorage.getItem(key) || '0'}`;
+})();
