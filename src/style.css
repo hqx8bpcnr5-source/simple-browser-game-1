@@ -14,13 +14,18 @@ h1 {
 }
 #info {
   width: 640px;
+  max-width: 100%;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
+.
+game-wrap {}
 canvas {
-  border: 1px solid #ccc;
-  background: linear-gradient(#f8f8f8, #eaeaea);
+  border: 1px solid #dcdcdc;
+  background: linear-gradient(#ffffff, #f3f3f3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
 }
 
 /* overlays */
@@ -53,4 +58,35 @@ canvas {
   margin-top: 8px;
   font-size: 16px;
   cursor: pointer;
+}
+
+/* buttons */
+button {
+  background: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+}
+button:hover {
+  background: #235a9a;
+}
+
+/* responsive tweaks */
+@media (max-width: 700px) {
+  body {
+    padding: 16px;
+  }
+  .panel {
+    width: 90%;
+  }
+  #info,
+  .game-wrap {
+    width: 100%;
+  }
+  canvas {
+    width: 100%;
+    height: auto;
+  }
 }
