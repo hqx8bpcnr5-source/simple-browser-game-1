@@ -1,23 +1,31 @@
 const scoreEl = document.getElementById('score');
 const timeEl = document.getElementById('time');
 const startScreen = document.getElementById('startScreen');
-const startBtn = document.getElementById('startBtn');
-const gameOver = document.getElementById('gameOver');
-const finalScoreEl = document.getElementById('finalScore');
-const highScoreEl = document.getElementById('highScore');
-const restartBtn = document.getElementById('restartBtn');
+const hitSoundUrls = [
+  {
+    url: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+    volume: 0.12,
+  },
+  {
+    url: 'https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg',
+    volume: 0.1,
+  },
+  {
+    url: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+    volume: 0.09,
+  },
+  {
+    url: 'https://actions.google.com/sounds/v1/foley/cloth_swoosh.ogg',
+    volume: 0.08,
+  },
+  { url: 'https://actions.google.com/sounds/v1/cartoon/pop.ogg', volume: 0.14 },
+];
+let hitSounds = [];
 
 let score = 0;
 let timeLeft = 30;
 let game = null;
 
-// simple WebAudio beep
-const hitSoundUrls = [
-  'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-  'https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg',
-  'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
-];
-let hitSounds = [];
 // Prevent overlapping/very rapid sound retriggers
 let lastHitMs = 0;
 const HIT_MIN_INTERVAL_MS = 120;
@@ -107,21 +115,21 @@ function createGame() {
 window.onGameOver = function (finalScore) {
   finalScoreEl.textContent = `Score: ${finalScore}`;
   const key = 'simple-browser-game-highscore';
-  const prev = parseInt(localStorage.getItem(key) || '0', 10);
-  if (finalScore > prev) {
-    localStorage.setItem(key, String(finalScore));
-  }
-  highScoreEl.textContent = `Highscore: ${localStorage.getItem(key) || '0'}`;
-  gameOver.classList.remove('hidden');
+  hitSounds = hitSoundUrls.map((info) => {
+    const a = new Audio(info.url);
+    a.volume = info.volume;
+    a.preload = 'auto';
+    return a;
+  });
 };
 
 startBtn.addEventListener('click', () => {
   startScreen.classList.add('hidden');
   // prepare sound on first user gesture
   if (!hitSounds.length) {
-    hitSounds = hitSoundUrls.map((u) => {
-      const a = new Audio(u);
-      a.volume = 0.12; // slightly lower default volume
+    hitSounds = hitSoundUrls.map((info) => {
+      const a = new Audio(info.url);
+      a.volume = info.volume || 0.12;
       a.preload = 'auto';
       return a;
     });
