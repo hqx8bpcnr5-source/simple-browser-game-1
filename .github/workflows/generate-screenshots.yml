@@ -1,0 +1,37 @@
+name: Generate screenshots and attach to Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install puppeteer
+        run: npm install puppeteer --no-audit --no-fund --no-save
+
+      - name: Generate PNGs
+        id: gen
+        run: |
+          # sizes can be configured via SIZES env or defaults used inside script
+          node scripts/svg-to-png.js 800x450 960x540
+
+      - name: Upload screenshots to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            assets/screenshot-800x450.png
+            assets/screenshot-960x540.png
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
