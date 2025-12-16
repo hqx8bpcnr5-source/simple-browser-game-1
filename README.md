@@ -32,6 +32,9 @@ python3 -m http.server 8000
 - `src/main.js` — ゲームロジック（Phaser シーン、UI 連携）
 - `src/style.css` — スタイル
 
+## スクリーンショット
+![screenshot](assets/screenshot.svg)
+
 ## 貢献
 - プルリクエスト歓迎。フォーマットは Prettier、Lint は ESLint に合わせてください。
 

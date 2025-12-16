@@ -12,24 +12,15 @@ let timeLeft = 30;
 let game = null;
 
 // simple WebAudio beep
-let audioCtx = null;
+let hitSound = null;
 function playBeep() {
   try {
-    if (!audioCtx)
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = 'sine';
-    o.frequency.value = 800;
-    g.gain.value = 0.08;
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    o.start();
-    setTimeout(() => {
-      o.stop();
-    }, 120);
+    if (hitSound) {
+      hitSound.currentTime = 0;
+      hitSound.play().catch(() => {});
+    }
   } catch (e) {
-    // ignore if audio not available
+    // ignore
   }
 }
 
@@ -81,7 +72,7 @@ const config = {
   type: Phaser.AUTO,
   width: 640,
   height: 480,
-  parent: null,
+  parent: 'game-container',
   scene: [MainScene],
   backgroundColor: '#f8f8f8',
 };
@@ -108,6 +99,12 @@ window.onGameOver = function (finalScore) {
 
 startBtn.addEventListener('click', () => {
   startScreen.classList.add('hidden');
+  // prepare sound on first user gesture
+  if (!hitSound) {
+    hitSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+    hitSound.volume = 0.18;
+    hitSound.preload = 'auto';
+  }
   createGame();
 });
 

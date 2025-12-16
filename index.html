@@ -9,9 +9,12 @@
 <body>
   <h1>クリックでキャッチ！</h1>
   <div id="info">
-    <span id="score">Score: 0</span>
-    <span id="time">Time: 30</span>
+    <div class="hud">
+      <span id="score" class="pill">Score: 0</span>
+      <span id="time" class="pill">Time: 30</span>
+    </div>
   </div>
+  <div class="game-wrap" id="game-container"></div>
   <!-- Phaser を CDN から読み込み -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
   <script type="module" src="src/main.js"></script>
